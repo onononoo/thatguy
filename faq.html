@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>thatguy · faq</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="nav">
+  <a href="index.html">thatguy</a>
+  <a href="coins.html">coins</a>
+  <a href="batch.html">batch</a>
+  <a href="check.html">check</a>
+  <a href="faq.html" aria-current="page">faq</a>
+</nav>
+
+<main>
+  <h1>thatguy / faq</h1>
+
+  <dl>
+    <dt>what is this?</dt>
+    <dd>a website that shows you a random crypto address every time you look at it. that's it. that's thatguy.</dd>
+
+    <dt>are the addresses real?</dt>
+    <dd>they are correctly formatted, with valid checksums, for <a href="coins.html">a lot of different coins</a>. paste one into a wallet and it will say it's a real address.</dd>
+
+    <dt>can i send coins to one?</dt>
+    <dd><strong>no.</strong> the addresses come from random bytes, not from a private key. nobody has the key, not you, not me, not anyone. anything sent there is gone forever.</dd>
+
+    <dt>so what's the point?</dt>
+    <dd>there isn't one. use them as placeholders for testing, for mockups, for screenshots, or just to stare at.</dd>
+
+    <dt>how does it work?</dt>
+    <dd>your browser picks random bytes and wraps them in the right format for the coin: base58check for bitcoin-style coins, bech32 or bech32m for segwit and cosmos-style chains, eip-55 for ethereum-style chains, cashaddr, ss58, stellar, nano, ton and a few more. the hashes (sha-256, keccak-256, blake2b) are plain javascript in <code>js/hash.js</code>.</dd>
+
+    <dt>does it send anything anywhere?</dt>
+    <dd>no. no server, no trackers, no analytics. it all happens on your computer. your history, your count and the fake price live in your browser's local storage.</dd>
+
+    <dt>what is TGUY?</dt>
+    <dd>not a coin. the price is a random walk that only exists in your browser. please do not ask where to buy it.</dd>
+
+    <dt>what does "luck" mean?</dt>
+    <dd>it's the first byte of the address's sha-256, mod 101. it means nothing. it's accurate, though.</dd>
+
+    <dt>how long would it take to crack one?</dt>
+    <dd>the "time to crack" stat assumes a trillion guesses per second. the sun will be gone long before that finishes.</dd>
+
+    <dt>keyboard shortcuts?</dt>
+    <dd>on the main page: space or n for another one, c to copy, v to change the view.</dd>
+
+    <dt>is this financial advice?</dt>
+    <dd>it is the opposite of financial advice.</dd>
+
+    <dt>can i run it myself?</dt>
+    <dd>yes. download the source and open <code>index.html</code>. no build step, no installs.</dd>
+
+    <dt>who is thatguy?</dt>
+    <dd>you are now.</dd>
+  </dl>
+</main>
+
+<footer>
+  <p>this project is open source, so please donate to keep all of my projects up! :) : bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4</p>
+  <p>source code and all of my projects! :] : <a href="https://github.com/onononoo/thatguy">https://github.com/onononoo/thatguy</a> :: <a href="https://github.com/onononoo/">https://github.com/onononoo/</a></p>
+</footer>
+</body>
+</html>

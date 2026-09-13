@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>thatguy · check</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="nav">
+  <a href="index.html">thatguy</a>
+  <a href="coins.html">coins</a>
+  <a href="batch.html">batch</a>
+  <a href="check.html" aria-current="page">check</a>
+  <a href="faq.html">faq</a>
+</nav>
+
+<main>
+  <h1>thatguy / check</h1>
+  <p class="center muted">paste any address. thatguy will tell you what it looks like and if the checksum adds up.</p>
+
+  <p><input type="text" id="input" class="wide" placeholder="paste an address" autocomplete="off" spellcheck="false"></p>
+  <div class="controls">
+    <button type="button" id="random">try a random one</button>
+    <button type="button" id="broken">try a broken one</button>
+    <button type="button" id="donate">try the donation address</button>
+  </div>
+
+  <p id="status" class="center"></p>
+  <ol id="matches" class="list"></ol>
+  <p class="muted small center">a valid format only means the typing is right. it says nothing about who (if anyone) has the key.</p>
+</main>
+
+<footer>
+  <p>this project is open source, so please donate to keep all of my projects up! :) : bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4</p>
+  <p>source code and all of my projects! :] : <a href="https://github.com/onononoo/thatguy">https://github.com/onononoo/thatguy</a> :: <a href="https://github.com/onononoo/">https://github.com/onononoo/</a></p>
+</footer>
+
+<script src="js/hash.js"></script>
+<script src="js/encode.js"></script>
+<script src="js/coins.js"></script>
+<script src="js/nonsense.js"></script>
+<script src="js/check.js"></script>
+</body>
+</html>

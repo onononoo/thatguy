@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>thatguy · batch</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="nav">
+  <a href="index.html">thatguy</a>
+  <a href="coins.html">coins</a>
+  <a href="batch.html" aria-current="page">batch</a>
+  <a href="check.html">check</a>
+  <a href="faq.html">faq</a>
+</nav>
+
+<main>
+  <h1>thatguy / batch</h1>
+  <p class="center muted">why have one useless address when you can have 500.</p>
+
+  <div class="controls">
+    <label>coin <select id="coin"></select></label>
+    <label>how many <input type="number" id="count" min="1" max="500" value="10"></label>
+    <label>format
+      <select id="format">
+        <option value="plain">plain</option>
+        <option value="csv">csv</option>
+        <option value="json">json</option>
+      </select>
+    </label>
+  </div>
+  <div class="controls">
+    <button type="button" id="go">make them</button>
+    <button type="button" id="copy">copy all</button>
+  </div>
+
+  <textarea id="out" readonly spellcheck="false"></textarea>
+  <p id="status" class="muted small center"></p>
+</main>
+
+<footer>
+  <p>this project is open source, so please donate to keep all of my projects up! :) : bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4</p>
+  <p>source code and all of my projects! :] : <a href="https://github.com/onononoo/thatguy">https://github.com/onononoo/thatguy</a> :: <a href="https://github.com/onononoo/">https://github.com/onononoo/</a></p>
+</footer>
+
+<script src="js/hash.js"></script>
+<script src="js/encode.js"></script>
+<script src="js/coins.js"></script>
+<script src="js/nonsense.js"></script>
+<script src="js/batch.js"></script>
+</body>
+</html>

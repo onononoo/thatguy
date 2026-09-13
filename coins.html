@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>thatguy · coins</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="nav">
+  <a href="index.html">thatguy</a>
+  <a href="coins.html" aria-current="page">coins</a>
+  <a href="batch.html">batch</a>
+  <a href="check.html">check</a>
+  <a href="faq.html">faq</a>
+</nav>
+
+<main>
+  <h1>thatguy / coins</h1>
+
+  <div class="controls">
+    <span id="total" class="muted"></span>
+    <button type="button" id="reroll">reroll everything</button>
+  </div>
+
+  <div class="scroll">
+    <table class="coins">
+      <thead>
+        <tr><th>network</th><th>ticker</th><th>format</th><th>example (fresh every time)</th><th>chars</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <p class="muted small">click a network to make only that kind on the main page.</p>
+</main>
+
+<footer>
+  <p>this project is open source, so please donate to keep all of my projects up! :) : bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4</p>
+  <p>source code and all of my projects! :] : <a href="https://github.com/onononoo/thatguy">https://github.com/onononoo/thatguy</a> :: <a href="https://github.com/onononoo/">https://github.com/onononoo/</a></p>
+</footer>
+
+<script src="js/hash.js"></script>
+<script src="js/encode.js"></script>
+<script src="js/coins.js"></script>
+<script src="js/nonsense.js"></script>
+<script src="js/coins-page.js"></script>
+</body>
+</html>
