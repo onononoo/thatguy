@@ -57,7 +57,7 @@ open `index.html`. that's it. it also works on github pages or any static host. 
 ## files
 
 ```
-index.html, coins.html, batch.html, check.html, faq.html
+index.html, coins.html, batch.html, check.html, faq.html, tomoko.html
 js/hash.js        sha-256, keccak-256, blake2b, crc16
 js/encode.js      base58, monero base58, bech32, base32, eip-55
 js/coins.js       the coins and formats, plus make/check for each
