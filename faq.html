@@ -4,65 +4,81 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>thatguy · faq</title>
-<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<nav class="nav">
-  <a href="index.html">thatguy</a>
-  <a href="coins.html">coins</a>
-  <a href="batch.html">batch</a>
-  <a href="check.html">check</a>
-  <a href="faq.html" aria-current="page">faq</a>
-</nav>
+<h1>thatguy</h1>
+<p>questions nobody asked, answered anyway.</p>
+<p><a href="index.html">thatguy</a> · <a href="coins.html">coins</a> · <a href="batch.html">batch</a> · <a href="check.html">check</a> · <b>faq</b></p>
+<hr>
 
-<main>
-  <h1>thatguy / faq</h1>
+<dl>
+  <dt><b>what is this?</b></dt>
+  <dd>a website that shows you a real crypto address from a real stranger every time you look at it. that's it. that's thatguy.</dd>
 
-  <dl>
-    <dt>what is this?</dt>
-    <dd>a website that shows you a random crypto address every time you look at it. that's it. that's thatguy.</dd>
+  <dt><b>are the addresses real?</b></dt>
+  <dd>yes. every address comes from its coin's actual blockchain: someone who just made a transaction, received a token, or simply has an account. the one exception is monero, see below.</dd>
 
-    <dt>are the addresses real?</dt>
-    <dd>they are correctly formatted, with valid checksums, for <a href="coins.html">a lot of different coins</a>. paste one into a wallet and it will say it's a real address.</dd>
+  <dt><b>which coins?</b></dt>
+  <dd>nineteen, in alphabetical order: avalanche, bitcoin, bnb, cardano, chainlink, dogecoin, ethereum, litecoin, monero, polkadot, shiba inu, solana, stellar, sui, tether, tron, usd coin, xrp and zcash.</dd>
 
-    <dt>can i send coins to one?</dt>
-    <dd><strong>no.</strong> the addresses come from random bytes, not from a private key. nobody has the key, not you, not me, not anyone. anything sent there is gone forever.</dd>
+  <dt><b>why is monero made up?</b></dt>
+  <dd>monero is built so that nobody can see who sends or receives anything. addresses never appear on its blockchain, so there are no real ones to find. monero addresses here are random, with a valid checksum and keys that are real points on the ed25519 curve (monero wallets check), but nobody owns them.</dd>
 
-    <dt>so what's the point?</dt>
-    <dd>there isn't one. use them as placeholders for testing, for mockups, for screenshots, or just to stare at.</dd>
+  <dt><b>why does tether have three kinds of address?</b></dt>
+  <dd>tether, usd coin, chainlink and shiba inu are tokens. they don't have addresses of their own. you hold them at a normal address on the chain they live on, so a USDT address is really an ethereum (ERC-20), tron (TRC-20) or solana (SPL) address. thatguy picks people who just moved the token, and skips smart contracts.</dd>
 
-    <dt>how does it work?</dt>
-    <dd>your browser picks random bytes and wraps them in the right format for the coin: base58check for bitcoin-style coins, bech32 or bech32m for segwit and cosmos-style chains, eip-55 for ethereum-style chains, cashaddr, ss58, stellar, nano, ton and a few more. the hashes (sha-256, keccak-256, blake2b) are plain javascript in <code>js/hash.js</code>.</dd>
+  <dt><b>can i send coins to one?</b></dt>
+  <dd><b>no.</b> a real address belongs to a real stranger, so anything you send is a gift to someone you'll never meet. a made-up monero address belongs to nobody, so anything sent there is gone forever. either way, don't.</dd>
 
-    <dt>does it send anything anywhere?</dt>
-    <dd>no. no server, no trackers, no analytics. it all happens on your computer. your history, your count and the fake price live in your browser's local storage.</dd>
+  <dt><b>where do the addresses come from?</b></dt>
+  <dd>free public apis, straight from your browser:
+    bitcoin: mempool.space (blockstream.info as backup).
+    litecoin: litecoinspace.org.
+    ethereum, chainlink, shiba inu, tether and usd coin on ethereum: ethereum-rpc.publicnode.com.
+    bnb: bsc-rpc.publicnode.com.
+    avalanche: avalanche-c-chain-rpc.publicnode.com and api.avax.network.
+    solana, tether and usd coin on solana: solana-rpc.publicnode.com.
+    tron and tether on tron: api.trongrid.io.
+    xrp: xrplcluster.com.
+    dogecoin: blockcypher.com and blockchair.com.
+    zcash: blockchair.com.
+    cardano: api.handle.me (wallets of people who own an ada handle).
+    stellar: horizon.stellar.org.
+    sui: sui-rpc.publicnode.com.
+    polkadot: polkadot-asset-hub-rpc.polkadot.io.</dd>
 
-    <dt>what is TGUY?</dt>
-    <dd>not a coin. the price is a random walk that only exists in your browser. please do not ask where to buy it.</dd>
+  <dt><b>why did i get a made-up address for a coin that isn't monero?</b></dt>
+  <dd>the api said no: it was down, slow, or you hit its free limit (blockchair's is small, so dogecoin script addresses and zcash run out first). the page tells you when that happens. wait a bit and try again.</dd>
 
-    <dt>what does "luck" mean?</dt>
-    <dd>it's the first byte of the address's sha-256, mod 101. it means nothing. it's accurate, though.</dd>
+  <dt><b>does it send anything about me anywhere?</b></dt>
+  <dd>no. there are no trackers and no analytics. but to find addresses, your browser talks to the apis listed above, and like any website they can see your ip address. your history, your count, the fake price and the stash of addresses stay in your browser's local storage.</dd>
 
-    <dt>how long would it take to crack one?</dt>
-    <dd>the "time to crack" stat assumes a trillion guesses per second. the sun will be gone long before that finishes.</dd>
+  <dt><b>what is TGUY?</b></dt>
+  <dd>not a coin. the price is a random walk that only exists in your browser. please do not ask where to buy it.</dd>
 
-    <dt>keyboard shortcuts?</dt>
-    <dd>on the main page: space or n for another one, c to copy, v to change the view.</dd>
+  <dt><b>what does "luck" mean?</b></dt>
+  <dd>it's the first byte of the address's sha-256, mod 101. it means nothing. it's accurate, though.</dd>
 
-    <dt>is this financial advice?</dt>
-    <dd>it is the opposite of financial advice.</dd>
+  <dt><b>how long would it take to crack one?</b></dt>
+  <dd>the "time to crack" stat assumes a trillion guesses per second. the sun will be gone long before that finishes. that's the whole point of these things.</dd>
 
-    <dt>can i run it myself?</dt>
-    <dd>yes. download the source and open <code>index.html</code>. no build step, no installs.</dd>
+  <dt><b>keyboard shortcuts?</b></dt>
+  <dd>on the main page: space or n for another one, c to copy, v to change the view.</dd>
 
-    <dt>who is thatguy?</dt>
-    <dd>you are now.</dd>
-  </dl>
-</main>
+  <dt><b>is this financial advice?</b></dt>
+  <dd>it is the opposite of financial advice.</dd>
 
-<footer>
-  <p>this project is open source, so please donate to keep all of my projects up! :) : bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4</p>
-  <p>source code and all of my projects! :] : <a href="https://github.com/onononoo/thatguy">https://github.com/onononoo/thatguy</a> :: <a href="https://github.com/onononoo/">https://github.com/onononoo/</a></p>
-</footer>
+  <dt><b>can i run it myself?</b></dt>
+  <dd>yes. download the source and open <code>index.html</code>. no build step, no installs. you need internet for the real addresses.</dd>
+
+  <dt><b>who is thatguy?</b></dt>
+  <dd>somebody out there. and now, a little bit, you.</dd>
+</dl>
+<hr>
+
+<p><small>this project is open source, so please donate to keep all of my projects up! :) : <span id="donation">bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4</span></small> <button type="button" id="copy-donation" title="copy">⧉</button></p>
+<p><small>source code and all of my projects! :] : <a href="https://github.com/onononoo/thatguy">https://github.com/onononoo/thatguy</a> :: <a href="https://github.com/onononoo/">https://github.com/onononoo/</a></small></p>
+
+<script src="js/footer.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-// encodings: base58(check), bech32(m), cashaddr, base32, nano base32, base64url, eip-55
+// encodings: base58(check), monero base58, bech32(m), base32, eip-55
 
 (function (TG) {
   "use strict";
@@ -6,8 +6,6 @@
   var B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
   var BECH32 = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
   var BASE32 = "abcdefghijklmnopqrstuvwxyz234567";
-  var NANO32 = "13456789abcdefghijkmnopqrstuwxyz";
-  var BASE64URL = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
   var BECH32M = 0x2bc830a3;
 
   // ---------- bytes ----------
@@ -191,54 +189,45 @@
     return { version: version, program: program };
   }
 
-  // ---------- cashaddr ----------
+  // ---------- monero base58 (8-byte blocks) ----------
 
-  var CASH_GEN = [0x98f2bc8e61n, 0x79b76d99e2n, 0xf33e5fb3c4n, 0xae2eabe2a8n, 0x1e4f43e470n];
+  var XMR_SIZES = [0, 2, 3, 5, 6, 7, 9, 10, 11];
 
-  function cashPolymod(values) {
-    var c = 1n;
-    for (var i = 0; i < values.length; i++) {
-      var c0 = c >> 35n;
-      c = ((c & 0x07ffffffffn) << 5n) ^ BigInt(values[i]);
-      for (var j = 0; j < 5; j++) if ((c0 >> BigInt(j)) & 1n) c ^= CASH_GEN[j];
+  function moneroBase58(bytes) {
+    var out = "";
+    for (var i = 0; i < bytes.length; i += 8) {
+      var block = bytes.slice(i, i + 8);
+      var num = 0n;
+      for (var j = 0; j < block.length; j++) num = (num << 8n) | BigInt(block[j]);
+      var chars = "";
+      for (var k = 0; k < XMR_SIZES[block.length]; k++) {
+        chars = B58[Number(num % 58n)] + chars;
+        num /= 58n;
+      }
+      out += chars;
     }
-    return c ^ 1n;
-  }
-
-  function cashPrefix(prefix) {
-    var out = [];
-    for (var i = 0; i < prefix.length; i++) out.push(prefix.charCodeAt(i) & 31);
-    out.push(0);
     return out;
   }
 
-  function cashaddrEncode(prefix, type, hash) {
-    var data = convertBits(concat([type << 3], hash), 8, 5, true);
-    var mod = cashPolymod(cashPrefix(prefix).concat(data, [0, 0, 0, 0, 0, 0, 0, 0]));
-    var str = prefix + ":", i;
-    for (i = 0; i < data.length; i++) str += BECH32[data[i]];
-    for (i = 0; i < 8; i++) str += BECH32[Number((mod >> BigInt(5 * (7 - i))) & 31n)];
-    return str;
-  }
-
-  function cashaddrDecode(str) {
-    if (str !== str.toLowerCase() && str !== str.toUpperCase()) return null;
-    str = str.toLowerCase();
-    var pos = str.indexOf(":");
-    if (pos < 1) return null;
-    var prefix = str.slice(0, pos), values = [];
-    for (var i = pos + 1; i < str.length; i++) {
-      var v = BECH32.indexOf(str[i]);
-      if (v < 0) return null;
-      values.push(v);
+  function unmoneroBase58(str) {
+    var out = [];
+    for (var i = 0; i < str.length; i += 11) {
+      var chunk = str.slice(i, i + 11);
+      var size = XMR_SIZES.indexOf(chunk.length);
+      if (size < 1) return null;
+      var num = 0n;
+      for (var j = 0; j < chunk.length; j++) {
+        var v = B58.indexOf(chunk[j]);
+        if (v < 0) return null;
+        num = num * 58n + BigInt(v);
+      }
+      if (num >> BigInt(size * 8)) return null;
+      for (var k = size - 1; k >= 0; k--) out.push(Number((num >> BigInt(k * 8)) & 255n));
     }
-    if (values.length < 9 || cashPolymod(cashPrefix(prefix).concat(values)) !== 0n) return null;
-    var bytes = convertBits(values.slice(0, -8), 5, 8, false);
-    if (!bytes || !bytes.length) return null;
-    return { prefix: prefix, type: bytes[0] >> 3, hash: bytes.slice(1) };
+    return new Uint8Array(out);
   }
 
-  // ---------- base32 / nano / base64url ----------
+  // ---------- base32 ----------
 
   function base32(bytes, alphabet) {
     alphabet = alphabet || BASE32;
@@ -257,46 +246,6 @@
     return bytes ? new Uint8Array(bytes) : null;
   }
 
-  function bitsEncode(bytes, padBits, alphabet) {
-    var n = 0n;
-    for (var i = 0; i < bytes.length; i++) n = (n << 8n) | BigInt(bytes[i]);
-    var chars = (bytes.length * 8 + padBits) / 5, out = "";
-    for (var k = chars - 1; k >= 0; k--) out += alphabet[Number((n >> BigInt(5 * k)) & 31n)];
-    return out;
-  }
-
-  function bitsDecode(str, byteLen, alphabet) {
-    var n = 0n;
-    for (var i = 0; i < str.length; i++) {
-      var v = alphabet.indexOf(str[i]);
-      if (v < 0) return null;
-      n = (n << 5n) | BigInt(v);
-    }
-    if (n >> BigInt(byteLen * 8)) return null;
-    var out = new Uint8Array(byteLen);
-    for (var k = byteLen - 1; k >= 0; k--) {
-      out[k] = Number(n & 255n);
-      n >>= 8n;
-    }
-    return out;
-  }
-
-  function base64url(bytes) {
-    return convertBits(bytes, 8, 6, true).map(function (v) { return BASE64URL[v]; }).join("");
-  }
-
-  function unbase64url(str) {
-    str = str.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-    var values = [];
-    for (var i = 0; i < str.length; i++) {
-      var v = BASE64URL.indexOf(str[i]);
-      if (v < 0) return null;
-      values.push(v);
-    }
-    var bytes = convertBits(values, 6, 8, false);
-    return bytes ? new Uint8Array(bytes) : null;
-  }
-
   // ---------- eip-55 ----------
 
   function eip55(lowerHex) {
@@ -310,7 +259,6 @@
 
   TG.enc = {
     BASE32: BASE32,
-    NANO32: NANO32,
     random: random,
     randomInt: randomInt,
     concat: concat,
@@ -326,14 +274,10 @@
     bech32Decode: bech32Decode,
     segwitEncode: segwitEncode,
     segwitDecode: segwitDecode,
-    cashaddrEncode: cashaddrEncode,
-    cashaddrDecode: cashaddrDecode,
+    moneroBase58: moneroBase58,
+    unmoneroBase58: unmoneroBase58,
     base32: base32,
     unbase32: unbase32,
-    bitsEncode: bitsEncode,
-    bitsDecode: bitsDecode,
-    base64url: base64url,
-    unbase64url: unbase64url,
     eip55: eip55
   };
 })(window.TG = window.TG || {});

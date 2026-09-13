@@ -4,69 +4,64 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>thatguy</title>
-<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<nav class="nav">
-  <a href="index.html" aria-current="page">thatguy</a>
-  <a href="coins.html">coins</a>
-  <a href="batch.html">batch</a>
-  <a href="check.html">check</a>
-  <a href="faq.html">faq</a>
-</nav>
+<h1>thatguy</h1>
+<p>a real crypto address from a real stranger, every time you refresh. 19 coins, pulled live from their blockchains. everything happens in this browser.</p>
+<p><b>thatguy</b> · <a href="coins.html">coins</a> · <a href="batch.html">batch</a> · <a href="check.html">check</a> · <a href="faq.html">faq</a></p>
+<hr>
 
-<main>
-  <h1>thatguy</h1>
+<p><b>1. choose a coin:</b> <select id="coin"></select></p>
+<p><b>2. meet thatguy:</b></p>
+<p><img id="logo" width="32" height="32" alt="" style="vertical-align:middle"> <span id="coin-name"></span></p>
+<p><code id="address" style="font-size:1.3em;word-break:break-all">...</code></p>
+<p>
+  <button type="button" id="again">another one</button>
+  <button type="button" id="copy">copy</button>
+  <button type="button" id="refresh">refresh</button>
+  view: <select id="view"></select>
+</p>
+<p><small>space = another one · c = copy · v = change view</small></p>
+<noscript><p>thatguy needs javascript to find addresses.</p></noscript>
+<hr>
 
-  <div class="controls">
-    <label>coin <select id="coin"></select></label>
-    <label>view <select id="view"></select></label>
-  </div>
+<h3>stats nobody asked for</h3>
+<table>
+  <tr><td>source</td><td id="source"></td></tr>
+  <tr><td>balance</td><td id="balance"></td></tr>
+  <tr><td>checksum</td><td id="checksum"></td></tr>
+  <tr><td>length</td><td id="length"></td></tr>
+  <tr><td>luck</td><td id="luck"></td></tr>
+  <tr><td>vibe</td><td id="vibe"></td></tr>
+  <tr><td>fortune</td><td id="fortune"></td></tr>
+  <tr><td>most common character</td><td id="common"></td></tr>
+  <tr><td>time to crack</td><td id="brute"></td></tr>
+  <tr><td>TGUY price</td><td id="price"></td></tr>
+  <tr><td>addresses you've seen</td><td id="count"></td></tr>
+  <tr><td>hodling this page for</td><td id="hodl">0s</td></tr>
+</table>
 
-  <div class="card">
-    <canvas id="blockie" width="8" height="8"></canvas>
-    <div id="coin-name" class="muted small"></div>
-    <code id="address" class="address">...</code>
-    <div class="buttons">
-      <button type="button" id="again">another one</button>
-      <button type="button" id="copy">copy</button>
-      <button type="button" id="refresh">refresh</button>
-    </div>
-    <p class="muted small">space = another one · c = copy · v = change view</p>
-  </div>
-  <noscript><p class="center muted">thatguy needs javascript to make addresses.</p></noscript>
+<h3>recent</h3>
+<ol id="history"></ol>
+<p><button type="button" id="clear">clear history</button></p>
+<hr>
 
-  <h2>stats nobody asked for</h2>
-  <div class="scroll">
-    <table class="stats">
-      <tr><td>checksum</td><td id="checksum"></td></tr>
-      <tr><td>length</td><td id="length"></td></tr>
-      <tr><td>balance</td><td>0 (nobody has the key. do not send anything here.)</td></tr>
-      <tr><td>luck</td><td id="luck"></td></tr>
-      <tr><td>vibe</td><td id="vibe"></td></tr>
-      <tr><td>fortune</td><td id="fortune"></td></tr>
-      <tr><td>most common character</td><td id="common"></td></tr>
-      <tr><td>time to crack</td><td id="brute"></td></tr>
-      <tr><td>TGUY price</td><td id="price"></td></tr>
-      <tr><td>addresses you've made</td><td id="count"></td></tr>
-      <tr><td>hodling this page for</td><td id="hodl">0s</td></tr>
-    </table>
-  </div>
+<h3>how it works</h3>
+<p>every coin has a public api that shows what's happening on its blockchain right now. thatguy asks one of them for a recent block, a page of transactions, or a slice of the account list, and picks an address out of it. one answer holds dozens of addresses, so the rest are kept in this browser for 15 minutes and most refreshes never touch the network.</p>
+<p>tokens like tether, usd coin, chainlink and shiba inu don't have addresses of their own, so thatguy finds people who just sent or received them on ethereum, tron or solana. smart contracts are filtered out, so what's left are ordinary wallets.</p>
+<p>monero is the one exception. its blockchain hides who sends and who receives, so there are no real addresses to find. monero addresses here are made up, with a valid checksum and valid keys, but nobody owns them.</p>
+<p>some apis have small free limits. if one says no, the page shows a made-up address instead and says so rather than pretending. please don't send anything to any of these addresses: the real ones belong to strangers, and the made-up ones belong to nobody.</p>
+<hr>
 
-  <h2>recent</h2>
-  <ol id="history" class="list"></ol>
-  <button type="button" id="clear">clear history</button>
-</main>
-
-<footer>
-  <p>this project is open source, so please donate to keep all of my projects up! :) : bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4</p>
-  <p>source code and all of my projects! :] : <a href="https://github.com/onononoo/thatguy">https://github.com/onononoo/thatguy</a> :: <a href="https://github.com/onononoo/">https://github.com/onononoo/</a></p>
-</footer>
+<p><small>this project is open source, so please donate to keep all of my projects up! :) : <span id="donation">bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4</span></small> <button type="button" id="copy-donation" title="copy">⧉</button></p>
+<p><small>source code and all of my projects! :] : <a href="https://github.com/onononoo/thatguy">https://github.com/onononoo/thatguy</a> :: <a href="https://github.com/onononoo/">https://github.com/onononoo/</a></small></p>
 
 <script src="js/hash.js"></script>
 <script src="js/encode.js"></script>
 <script src="js/coins.js"></script>
 <script src="js/nonsense.js"></script>
+<script src="js/chain.js"></script>
+<script src="js/footer.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

@@ -4,50 +4,36 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>thatguy · batch</title>
-<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<nav class="nav">
-  <a href="index.html">thatguy</a>
-  <a href="coins.html">coins</a>
-  <a href="batch.html" aria-current="page">batch</a>
-  <a href="check.html">check</a>
-  <a href="faq.html">faq</a>
-</nav>
+<h1>thatguy</h1>
+<p>why meet one stranger when you can meet 500. lots of real addresses at once, as plain text, csv or json.</p>
+<p><a href="index.html">thatguy</a> · <a href="coins.html">coins</a> · <b>batch</b> · <a href="check.html">check</a> · <a href="faq.html">faq</a></p>
+<hr>
 
-<main>
-  <h1>thatguy / batch</h1>
-  <p class="center muted">why have one useless address when you can have 500.</p>
+<p><b>1. choose a coin:</b> <select id="coin"></select></p>
+<p><b>2. how many:</b> <input type="number" id="count" min="1" max="500" value="10"></p>
+<p><b>3. format:</b>
+  <select id="format">
+    <option value="plain">plain</option>
+    <option value="csv">csv</option>
+    <option value="json">json</option>
+  </select>
+</p>
+<p><button type="button" id="go">find them</button> <button type="button" id="copy">copy all</button></p>
+<p><textarea id="out" rows="16" readonly spellcheck="false" style="width:100%"></textarea></p>
+<p id="status"></p>
+<hr>
 
-  <div class="controls">
-    <label>coin <select id="coin"></select></label>
-    <label>how many <input type="number" id="count" min="1" max="500" value="10"></label>
-    <label>format
-      <select id="format">
-        <option value="plain">plain</option>
-        <option value="csv">csv</option>
-        <option value="json">json</option>
-      </select>
-    </label>
-  </div>
-  <div class="controls">
-    <button type="button" id="go">make them</button>
-    <button type="button" id="copy">copy all</button>
-  </div>
-
-  <textarea id="out" readonly spellcheck="false"></textarea>
-  <p id="status" class="muted small center"></p>
-</main>
-
-<footer>
-  <p>this project is open source, so please donate to keep all of my projects up! :) : bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4</p>
-  <p>source code and all of my projects! :] : <a href="https://github.com/onononoo/thatguy">https://github.com/onononoo/thatguy</a> :: <a href="https://github.com/onononoo/">https://github.com/onononoo/</a></p>
-</footer>
+<p><small>this project is open source, so please donate to keep all of my projects up! :) : <span id="donation">bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4</span></small> <button type="button" id="copy-donation" title="copy">⧉</button></p>
+<p><small>source code and all of my projects! :] : <a href="https://github.com/onononoo/thatguy">https://github.com/onononoo/thatguy</a> :: <a href="https://github.com/onononoo/">https://github.com/onononoo/</a></small></p>
 
 <script src="js/hash.js"></script>
 <script src="js/encode.js"></script>
 <script src="js/coins.js"></script>
 <script src="js/nonsense.js"></script>
+<script src="js/chain.js"></script>
+<script src="js/footer.js"></script>
 <script src="js/batch.js"></script>
 </body>
 </html>

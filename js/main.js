@@ -9,6 +9,7 @@
   var viewSelect = $("view");
   var startedAt = Date.now();
   var current = null;
+  var token = 0;
 
   TG.fillCoinSelect(coinSelect, true);
   TG.viewNames.forEach(function (name) { viewSelect.add(new Option(name, name)); });
@@ -22,13 +23,28 @@
   }
 
   function generate() {
+    var mine = ++token;
     var coin = coinSelect.value === "random" ? TG.pickCoin() : TG.findCoin(coinSelect.value);
-    var address = TG.make(coin);
+    $("coin-name").textContent = coin.name + " (" + coin.ticker + ") · " + coin.type;
+    $("logo").src = "logos/" + coin.ticker.toLowerCase() + ".svg";
+    $("logo").alt = coin.name + " logo";
+    if (TG.chain.isLive(coin)) $("address").textContent = "digging through the blockchain...";
+
+    TG.makeReal(coin)
+      .catch(function (err) {
+        return { address: TG.make(coin), item: null, error: err };
+      })
+      .then(function (result) {
+        if (mine === token) show(coin, result, mine);
+      });
+  }
+
+  function show(coin, result, mine) {
+    var address = result.address;
     current = { coin: coin, address: address };
 
     showAddress();
-    $("coin-name").textContent = coin.name + " (" + coin.ticker + ") · " + coin.type;
-    TG.blockie($("blockie"), address);
+    showSource(coin, result, mine);
 
     $("checksum").textContent = TG.check(coin, address) ? "valid ✓" : "invalid ✗ (this should never happen)";
     $("length").textContent = address.length + " characters";
@@ -40,8 +56,49 @@
     $("price").textContent = TG.fakePrice();
     $("count").textContent = TG.bump();
 
-    TG.history.add(coin, address);
+    TG.history.add(coin, address, !!result.item);
     renderHistory();
+  }
+
+  function showSource(coin, result, mine) {
+    var source = $("source");
+    var balance = $("balance");
+    source.textContent = "";
+
+    if (!result.item) {
+      if (!TG.chain.isLive(coin)) {
+        source.textContent = "made up. monero hides every address on its blockchain, so there are no real ones to show";
+      } else {
+        source.textContent = "made up, couldn't reach the blockchain (" + result.error.message + ")";
+      }
+      balance.textContent = "0 (nobody has the key. do not send anything here.)";
+      return;
+    }
+
+    source.appendChild(document.createTextNode("real, from " + result.item.via));
+    var url = TG.chain.explorer(coin, result.address);
+    if (url) {
+      var link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "look it up";
+      source.appendChild(document.createTextNode(" · "));
+      source.appendChild(link);
+    }
+
+    var warning = " · belongs to a real stranger, don't send anything";
+    if (!TG.chain.canLookup(coin)) {
+      balance.textContent = "not checked here, see \"look it up\"" + warning;
+      return;
+    }
+    balance.textContent = "checking...";
+    TG.chain.lookup(coin, result.address).then(function (info) {
+      if (mine !== token) return;
+      balance.textContent = info.amount + " across " + info.txCount + (info.txCount === 1 ? " tx" : " txs") + warning;
+    }, function () {
+      if (mine === token) balance.textContent = "couldn't check (the explorer is busy)" + warning;
+    });
   }
 
   function renderHistory() {
@@ -52,17 +109,15 @@
       var li = document.createElement("li");
       var code = document.createElement("code");
       code.textContent = item.address;
-      var label = document.createElement("span");
-      label.className = "muted";
-      label.textContent = " · " + item.ticker + " " + item.type;
       li.appendChild(code);
-      li.appendChild(label);
+      li.appendChild(document.createTextNode(" · " + item.ticker + " " + item.type + (item.real ? " (real)" : " (made up)")));
       list.appendChild(li);
     });
     $("clear").hidden = !items.length;
   }
 
   function copy() {
+    if (!current) return;
     TG.copy(current.address).then(
       function () { TG.flash($("copy"), "copied!"); },
       function () { TG.flash($("copy"), "couldn't copy"); }

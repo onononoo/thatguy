@@ -19,7 +19,7 @@
     "hodl on tight",
     "the mempool believes in you",
     "a whale just blinked",
-    "not your keys, not anyone's keys",
+    "not your keys, not your coins. definitely not your address.",
     "satoshi would have refreshed too",
     "bullish on refreshing",
     "this one feels lucky. it isn't.",
@@ -150,9 +150,9 @@
     list: function () {
       return TG.store.get("tg-history", []);
     },
-    add: function (coin, address) {
+    add: function (coin, address, real) {
       var items = TG.history.list();
-      items.unshift({ name: coin.name, ticker: coin.ticker, type: coin.type, address: address });
+      items.unshift({ name: coin.name, ticker: coin.ticker, type: coin.type, address: address, real: !!real });
       TG.store.set("tg-history", items.slice(0, 10));
     },
     clear: function () {
@@ -165,23 +165,6 @@
     var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
     s = s % 60;
     return (h ? h + "h " : "") + (h || m ? m + "m " : "") + s + "s";
-  };
-
-  // tiny 8x8 mirrored identicon
-  TG.blockie = function (canvas, address) {
-    var h = hashOf(address);
-    var ctx = canvas.getContext("2d");
-    var hue = Math.round(h[0] / 255 * 360);
-    ctx.clearRect(0, 0, 8, 8);
-    ctx.fillStyle = "hsl(" + hue + ", 60%, 50%)";
-    for (var y = 0; y < 8; y++) {
-      for (var x = 0; x < 4; x++) {
-        if ((h[1 + y] >> x) & 1) {
-          ctx.fillRect(x, y, 1, 1);
-          ctx.fillRect(7 - x, y, 1, 1);
-        }
-      }
-    }
   };
 
   TG.copy = function (text) {

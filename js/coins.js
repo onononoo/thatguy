@@ -11,8 +11,47 @@
     return TG.blake2b(E.concat(TG.utf8("SS58PRE"), data), 64).slice(0, 2);
   }
 
-  function nanoSum(pub) {
-    return TG.blake2b(pub, 5).reverse();
+  // ---------- ed25519 point check (monero wallets reject keys that aren't on the curve) ----------
+
+  var P = (1n << 255n) - 19n;
+
+  function mod(n) {
+    n %= P;
+    return n < 0n ? n + P : n;
+  }
+
+  function pow(b, e) {
+    var r = 1n;
+    b = mod(b);
+    while (e > 0n) {
+      if (e & 1n) r = r * b % P;
+      b = b * b % P;
+      e >>= 1n;
+    }
+    return r;
+  }
+
+  var D = mod(-121665n * pow(121666n, P - 2n));
+
+  function isEdPoint(bytes) {
+    var y = 0n;
+    for (var i = 31; i >= 0; i--) y = (y << 8n) | BigInt(bytes[i]);
+    y &= (1n << 255n) - 1n;
+    if (y >= P) return false;
+    var y2 = y * y % P;
+    var u = mod(y2 - 1n);
+    var v = mod(D * y2 + 1n);
+    var v3 = v * v % P * v % P;
+    var x = u * v3 % P * pow(u * v3 % P * v3 % P * v % P, (P - 5n) / 8n) % P;
+    var vx2 = v * x % P * x % P;
+    return vx2 === u || vx2 === mod(-u);
+  }
+
+  function randomEdPoint() {
+    for (;;) {
+      var bytes = E.random(32);
+      if (isEdPoint(bytes)) return bytes;
+    }
   }
 
   // a family knows how to make an address from params, and how to check one
@@ -39,9 +78,14 @@
 
     bech32: {
       make: function (p) {
-        return E.bech32Encode(p.hrp, E.convertBits(E.concat(p.header, E.random(p.len)), 8, 5, true), "");
+        return (p.chain || "") +
+          E.bech32Encode(p.hrp, E.convertBits(E.concat(p.header, E.random(p.len)), 8, 5, true), "");
       },
       check: function (a, p) {
+        if (p.chain) {
+          if (a.slice(0, p.chain.length) !== p.chain) return false;
+          a = a.slice(p.chain.length);
+        }
         var d = E.bech32Decode(a);
         if (!d || d.hrp !== p.hrp || d.variant !== "") return false;
         var bytes = E.convertBits(d.data, 5, 8, false);
@@ -58,17 +102,6 @@
         var body = a.slice(2);
         if (body === body.toLowerCase() || body === body.toUpperCase()) return true;
         return E.eip55(body.toLowerCase()) === a;
-      }
-    },
-
-    cashaddr: {
-      make: function (p) {
-        return E.cashaddrEncode("bitcoincash", p.type, E.random(20));
-      },
-      check: function (a, p) {
-        if (a.indexOf(":") < 0) a = "bitcoincash:" + a;
-        var d = E.cashaddrDecode(a);
-        return !!d && d.prefix === "bitcoincash" && d.type === p.type && d.hash.length === 20;
       }
     },
 
@@ -97,43 +130,17 @@
       }
     },
 
-    nano: {
-      make: function () {
-        var pub = E.random(32);
-        return "nano_" + E.bitsEncode(pub, 4, E.NANO32) + E.bitsEncode(nanoSum(pub), 0, E.NANO32);
-      },
-      check: function (a) {
-        var m = /^(?:nano|xrb)_([13][13456789abcdefghijkmnopqrstuwxyz]{59})$/.exec(a);
-        if (!m) return false;
-        var pub = E.bitsDecode(m[1].slice(0, 52), 32, E.NANO32);
-        var sum = E.bitsDecode(m[1].slice(52), 5, E.NANO32);
-        return !!pub && !!sum && E.equal(nanoSum(pub), sum);
-      }
-    },
-
-    filecoin: {
-      make: function () {
-        var payload = E.random(20);
-        return "f1" + E.base32(E.concat(payload, TG.blake2b(E.concat([1], payload), 4)));
-      },
-      check: function (a) {
-        if (a.slice(0, 2) !== "f1") return false;
-        var d = E.unbase32(a.slice(2));
-        return !!d && d.length === 24 && E.equal(TG.blake2b(E.concat([1], d.slice(0, 20)), 4), d.slice(20));
-      }
-    },
-
-    ton: {
+    monero: {
       make: function (p) {
-        var body = E.concat([p.tag, 0], E.random(32));
-        var crc = TG.crc16(body);
-        return E.base64url(E.concat(body, [crc >> 8, crc & 255]));
+        var data = E.concat([p.prefix], randomEdPoint(), randomEdPoint());
+        return E.moneroBase58(E.concat(data, TG.keccak256(data).slice(0, 4)));
       },
       check: function (a, p) {
-        var d = E.unbase64url(a);
-        if (!d || d.length !== 36 || d[0] !== p.tag || d[1] !== 0) return false;
-        var crc = TG.crc16(d.slice(0, 34));
-        return d[34] === crc >> 8 && d[35] === (crc & 255);
+        if (!/^[1-9A-HJ-NP-Za-km-z]{95}$/.test(a)) return false;
+        var d = E.unmoneroBase58(a);
+        return !!d && d.length === 69 && d[0] === p.prefix &&
+          E.equal(TG.keccak256(d.slice(0, 65)).slice(0, 4), d.slice(65)) &&
+          isEdPoint(d.slice(1, 33)) && isEdPoint(d.slice(33, 65));
       }
     },
 
@@ -158,88 +165,68 @@
     }
   };
 
-  // [network, ticker, format, family, params]
+  // [name, ticker, format, family, params]
+  // tokens (USDT, USDC, LINK, SHIB) don't have their own addresses: you hold them at an
+  // ordinary address on the chain they live on, so their formats are that chain's.
+  // kept in alphabetical order by name (and sorted again below, just in case)
   var LIST = [
+    ["Avalanche", "AVAX", "C-Chain account", "evm", { len: 20 }],
+    ["Avalanche", "AVAX", "X-Chain address", "bech32", { chain: "X-", hrp: "avax", header: [], len: 20 }],
+    ["Avalanche", "AVAX", "P-Chain address", "bech32", { chain: "P-", hrp: "avax", header: [], len: 20 }],
+
     ["Bitcoin", "BTC", "legacy (p2pkh)", "base58check", { prefix: [0x00], len: 20 }],
     ["Bitcoin", "BTC", "script (p2sh)", "base58check", { prefix: [0x05], len: 20 }],
     ["Bitcoin", "BTC", "native segwit (p2wpkh)", "segwit", { hrp: "bc", version: 0, len: 20 }],
     ["Bitcoin", "BTC", "segwit script (p2wsh)", "segwit", { hrp: "bc", version: 0, len: 32 }],
     ["Bitcoin", "BTC", "taproot (p2tr)", "segwit", { hrp: "bc", version: 1, len: 32 }],
 
-    ["Bitcoin Testnet", "tBTC", "legacy (p2pkh)", "base58check", { prefix: [0x6f], len: 20 }],
-    ["Bitcoin Testnet", "tBTC", "script (p2sh)", "base58check", { prefix: [0xc4], len: 20 }],
-    ["Bitcoin Testnet", "tBTC", "native segwit (p2wpkh)", "segwit", { hrp: "tb", version: 0, len: 20 }],
-    ["Bitcoin Testnet", "tBTC", "taproot (p2tr)", "segwit", { hrp: "tb", version: 1, len: 32 }],
+    ["BNB", "BNB", "BNB Smart Chain account", "evm", { len: 20 }],
+
+    ["Cardano", "ADA", "base address", "bech32", { hrp: "addr", header: [0x01], len: 56 }],
+
+    ["Chainlink", "LINK", "ERC-20 (on Ethereum)", "evm", { len: 20 }],
+
+    ["Dogecoin", "DOGE", "legacy (p2pkh)", "base58check", { prefix: [0x1e], len: 20 }],
+    ["Dogecoin", "DOGE", "script (p2sh)", "base58check", { prefix: [0x16], len: 20 }],
+
+    ["Ethereum", "ETH", "account (eip-55)", "evm", { len: 20 }],
 
     ["Litecoin", "LTC", "legacy (p2pkh)", "base58check", { prefix: [0x30], len: 20 }],
     ["Litecoin", "LTC", "script (p2sh)", "base58check", { prefix: [0x32], len: 20 }],
     ["Litecoin", "LTC", "native segwit (p2wpkh)", "segwit", { hrp: "ltc", version: 0, len: 20 }],
 
-    ["Dogecoin", "DOGE", "legacy (p2pkh)", "base58check", { prefix: [0x1e], len: 20 }],
-    ["Dogecoin", "DOGE", "script (p2sh)", "base58check", { prefix: [0x16], len: 20 }],
+    ["Monero", "XMR", "standard address", "monero", { prefix: 18, len: 32 }],
+    ["Monero", "XMR", "subaddress", "monero", { prefix: 42, len: 32 }],
 
-    ["Bitcoin Cash", "BCH", "cashaddr (p2pkh)", "cashaddr", { type: 0, len: 20 }],
-    ["Bitcoin Cash", "BCH", "cashaddr (p2sh)", "cashaddr", { type: 1, len: 20 }],
+    ["Polkadot", "DOT", "account (ss58)", "ss58", { prefix: 0, len: 32 }],
 
-    ["Dash", "DASH", "legacy (p2pkh)", "base58check", { prefix: [0x4c], len: 20 }],
-    ["Dash", "DASH", "script (p2sh)", "base58check", { prefix: [0x10], len: 20 }],
+    ["Shiba Inu", "SHIB", "ERC-20 (on Ethereum)", "evm", { len: 20 }],
 
-    ["Bitcoin Gold", "BTG", "legacy (p2pkh)", "base58check", { prefix: [0x26], len: 20 }],
-    ["Bitcoin Gold", "BTG", "script (p2sh)", "base58check", { prefix: [0x17], len: 20 }],
-
-    ["Zcash", "ZEC", "transparent (t1)", "base58check", { prefix: [0x1c, 0xb8], len: 20 }],
-    ["Zcash", "ZEC", "transparent script (t3)", "base58check", { prefix: [0x1c, 0xbd], len: 20 }],
-
-    ["DigiByte", "DGB", "legacy (p2pkh)", "base58check", { prefix: [0x1e], len: 20 }],
-    ["DigiByte", "DGB", "native segwit (p2wpkh)", "segwit", { hrp: "dgb", version: 0, len: 20 }],
-
-    ["Ravencoin", "RVN", "legacy (p2pkh)", "base58check", { prefix: [0x3c], len: 20 }],
-    ["Namecoin", "NMC", "legacy (p2pkh)", "base58check", { prefix: [0x34], len: 20 }],
-    ["Peercoin", "PPC", "legacy (p2pkh)", "base58check", { prefix: [0x37], len: 20 }],
-    ["Vertcoin", "VTC", "native segwit (p2wpkh)", "segwit", { hrp: "vtc", version: 0, len: 20 }],
-    ["Qtum", "QTUM", "legacy (p2pkh)", "base58check", { prefix: [0x3a], len: 20 }],
-    ["Komodo", "KMD", "legacy (p2pkh)", "base58check", { prefix: [0x3c], len: 20 }],
-
-    ["Ethereum", "ETH", "account (eip-55)", "evm", { len: 20 }],
-    ["BNB Smart Chain", "BNB", "account (eip-55)", "evm", { len: 20 }],
-    ["Polygon", "POL", "account (eip-55)", "evm", { len: 20 }],
-    ["Arbitrum One", "ETH", "account (eip-55)", "evm", { len: 20 }],
-    ["Optimism", "ETH", "account (eip-55)", "evm", { len: 20 }],
-    ["Base", "ETH", "account (eip-55)", "evm", { len: 20 }],
-    ["Avalanche C-Chain", "AVAX", "account (eip-55)", "evm", { len: 20 }],
-    ["Ethereum Classic", "ETC", "account (eip-55)", "evm", { len: 20 }],
-
-    ["TRON", "TRX", "account", "base58check", { prefix: [0x41], len: 20 }],
-    ["XRP Ledger", "XRP", "classic address", "base58check", { prefix: [0x00], len: 20, alphabet: XRP58 }],
-
-    ["Tezos", "XTZ", "tz1 (ed25519)", "base58check", { prefix: [6, 161, 159], len: 20 }],
-    ["Tezos", "XTZ", "tz2 (secp256k1)", "base58check", { prefix: [6, 161, 161], len: 20 }],
-    ["Tezos", "XTZ", "tz3 (p-256)", "base58check", { prefix: [6, 161, 164], len: 20 }],
+    ["Solana", "SOL", "account", "solana", { len: 32 }],
 
     ["Stellar", "XLM", "account (G...)", "stellar", { len: 32 }],
 
-    ["Polkadot", "DOT", "account (ss58)", "ss58", { prefix: 0, len: 32 }],
-    ["Kusama", "KSM", "account (ss58)", "ss58", { prefix: 2, len: 32 }],
-    ["Substrate", "SUB", "generic account (ss58)", "ss58", { prefix: 42, len: 32 }],
-
-    ["Nano", "XNO", "account", "nano", { len: 32 }],
-    ["Filecoin", "FIL", "secp256k1 (f1)", "filecoin", { len: 20 }],
-
-    ["TON", "TON", "bounceable (EQ)", "ton", { tag: 0x11, len: 32 }],
-    ["TON", "TON", "non-bounceable (UQ)", "ton", { tag: 0x51, len: 32 }],
-
-    ["Solana", "SOL", "account", "solana", { len: 32 }],
-    ["Aptos", "APT", "account", "hex", { prefix: "0x", len: 32 }],
     ["Sui", "SUI", "account", "hex", { prefix: "0x", len: 32 }],
-    ["NEAR", "NEAR", "implicit account", "hex", { prefix: "", len: 32 }],
 
-    ["Cosmos Hub", "ATOM", "account", "bech32", { hrp: "cosmos", header: [], len: 20 }],
-    ["Osmosis", "OSMO", "account", "bech32", { hrp: "osmo", header: [], len: 20 }],
-    ["Celestia", "TIA", "account", "bech32", { hrp: "celestia", header: [], len: 20 }],
+    ["Tether", "USDT", "ERC-20 (on Ethereum)", "evm", { len: 20 }],
+    ["Tether", "USDT", "TRC-20 (on TRON)", "base58check", { prefix: [0x41], len: 20 }],
+    ["Tether", "USDT", "SPL (on Solana)", "solana", { len: 32 }],
 
-    ["Cardano", "ADA", "base address", "bech32", { hrp: "addr", header: [0x01], len: 56 }],
-    ["Cardano", "ADA", "enterprise address", "bech32", { hrp: "addr", header: [0x61], len: 28 }]
+    ["TRON", "TRX", "account", "base58check", { prefix: [0x41], len: 20 }],
+
+    ["USD Coin", "USDC", "ERC-20 (on Ethereum)", "evm", { len: 20 }],
+    ["USD Coin", "USDC", "SPL (on Solana)", "solana", { len: 32 }],
+
+    ["XRP", "XRP", "classic address", "base58check", { prefix: [0x00], len: 20, alphabet: XRP58 }],
+
+    ["Zcash", "ZEC", "transparent (t1)", "base58check", { prefix: [0x1c, 0xb8], len: 20 }],
+    ["Zcash", "ZEC", "transparent script (t3)", "base58check", { prefix: [0x1c, 0xbd], len: 20 }]
   ];
+
+  // sort by name only; formats of the same coin keep their order (sort is stable)
+  LIST.sort(function (a, b) {
+    return a[0].localeCompare(b[0], "en", { sensitivity: "base" });
+  });
 
   TG.coins = LIST.map(function (row) {
     return {
@@ -252,6 +239,13 @@
       bits: Math.min(row[4].len * 8, 256)
     };
   });
+
+  TG.isEdPoint = isEdPoint;
+
+  TG.ss58 = function (prefix, pubkey) {
+    var data = E.concat([prefix], pubkey);
+    return E.base58(E.concat(data, ss58sum(data)));
+  };
 
   TG.findCoin = function (id) {
     for (var i = 0; i < TG.coins.length; i++) if (TG.coins[i].id === id) return TG.coins[i];
