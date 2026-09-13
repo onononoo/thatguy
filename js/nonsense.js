@@ -1,4 +1,4 @@
-// the important stuff: vibes, luck, fortunes, fake prices, emoji
+// the important stuff: luck, fortunes, fake prices, emoji
 
 (function (TG) {
   "use strict";
@@ -46,13 +46,6 @@
     "the real crypto was the refreshes we made along the way"
   ];
 
-  var VIBES = [
-    "bullish", "bearish", "crabwise", "moon-adjacent", "rekt", "degen", "comfy",
-    "wagmi", "ngmi", "sideways", "hopium", "copium", "based", "suspiciously calm",
-    "rug-proof", "fud-resistant", "early", "late", "exit liquidity", "down bad",
-    "up only", "touching grass", "ser", "gigabrain"
-  ];
-
   var EMOJI = [
     "🚀", "🌕", "💎", "🙌", "🐋", "🐂", "🐻", "🔥", "📈", "📉", "🧊", "🪙",
     "💸", "🦀", "🍌", "🧠", "👀", "🎲", "🔑", "🔒", "⚡", "🌊", "🍕", "🐸",
@@ -90,10 +83,6 @@
 
   TG.luck = function (address) {
     return hashOf(address)[0] % 101;
-  };
-
-  TG.vibe = function (address) {
-    return VIBES[hashOf(address)[1] % VIBES.length];
   };
 
   TG.mostCommon = function (address) {

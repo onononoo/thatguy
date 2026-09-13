@@ -49,7 +49,6 @@
     $("checksum").textContent = TG.check(coin, address) ? "valid ✓" : "invalid ✗ (this should never happen)";
     $("length").textContent = address.length + " characters";
     $("luck").textContent = TG.luck(address) + "/100";
-    $("vibe").textContent = TG.vibe(address);
     $("fortune").textContent = TG.fortune();
     $("common").textContent = TG.mostCommon(address);
     $("brute").textContent = TG.bruteForce(coin.bits);
