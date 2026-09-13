@@ -73,3 +73,5 @@ logos/            coin logos from web3icons (MIT, see logos/LICENSE.txt)
 this project is open source, so please donate to keep all of my projects up! :) : bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4
 
 all of my projects! :] : https://github.com/onononoo/
+                                                                                                             ^
+does anybody read this :: its called a readme :( i hope u guys read this and **donate to my cryptocurrency** |
