@@ -38,4 +38,4 @@ js/coins-page.js, js/batch.js, js/check.js   the other pages
 
 this project is open source, so please donate to keep all of my projects up! :) : bc1qs4z04ltddh6vaqd4stu3p4vekv253ht4cwqma4
 
-source code and all of my projects! :] : https://github.com/onononoo/thatguy :: https://github.com/onononoo/
+all of my projects! :] : https://github.com/onononoo/
