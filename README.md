@@ -2,8 +2,6 @@
 
 a website that shows a random, validly formatted crypto address every time you refresh.
 
-**do not send anything to these addresses.** they're built from random bytes, so nobody has the private key and anything sent there is gone for good.
-
 ## features
 
 - 60 address formats across 41 networks: bitcoin (legacy, p2sh, segwit, p2wsh, taproot, testnet), litecoin, dogecoin, bitcoin cash, dash, zcash, ethereum and friends, tron, xrp, tezos, stellar, polkadot, kusama, nano, filecoin, ton, solana, aptos, sui, near, cosmos, cardano and more
@@ -15,7 +13,7 @@ a website that shows a random, validly formatted crypto address every time you r
 - **faq**: questions nobody asked
 - no dependencies, no build step, no trackers. it all runs in the browser
 
-## run it
+## run it locally
 
 open `index.html`. that's it. it also works on github pages or any static host.
 
