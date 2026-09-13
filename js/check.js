@@ -25,7 +25,7 @@
 
     var hits = TG.identify(value);
     if (!hits.length) {
-      $("status").textContent = "✗ not thatguy-shaped. typo? unsupported coin? just vibes?";
+      $("status").textContent = "✗ not thatguy-shaped. typo? unsupported coin? just shits and giggles????";
       return;
     }
 
