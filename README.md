@@ -57,13 +57,14 @@ open `index.html`. that's it. it also works on github pages or any static host. 
 ## files
 
 ```
-index.html, coins.html, batch.html, check.html, faq.html, tomoko.html
+index.html, coins.html, batch.html, check.html, faq.html, tomoko.html, donate.html
 js/hash.js        sha-256, keccak-256, blake2b, crc16
 js/encode.js      base58, monero base58, bech32, base32, eip-55
 js/coins.js       the coins and formats, plus make/check for each
 js/chain.js       where the real addresses come from, one source per coin
 js/nonsense.js    luck, fortunes, the fake price, emoji
 js/footer.js      the donation copy button
+js/donate.js      the click-to-copy address on the donate page
 js/main.js, js/coins-page.js, js/batch.js, js/check.js   one per page
 logos/            coin logos from web3icons (MIT, see logos/LICENSE.txt)
 ```

@@ -157,7 +157,14 @@
   };
 
   TG.copy = function (text) {
-    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).catch(function () { return copyFallback(text); });
+    }
+    return copyFallback(text);
+  };
+
+  // older way, for when the clipboard api is missing or says no
+  function copyFallback(text) {
     return new Promise(function (resolve, reject) {
       var ta = document.createElement("textarea");
       ta.value = text;
@@ -172,7 +179,7 @@
       }
       document.body.removeChild(ta);
     });
-  };
+  }
 
   TG.flash = function (button, text) {
     var original = button.dataset.label || button.textContent;
