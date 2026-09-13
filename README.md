@@ -42,7 +42,7 @@ if an api is down or you hit its free limit (blockchair's is small), the page sh
 
 ## pages
 
-- **thatguy**: one address, with a copy button, view modes (emoji, backwards, shouting, binary...) and stats nobody asked for, including the live balance for bitcoin and litecoin
+- **thatguy**: one address, with a copy button, view modes (emoji, backwards, shouting, mocking, binary, morse, tomoko...) and stats nobody asked for, including the live balance for bitcoin and litecoin
 - **coins**: a fresh real example of every format
 - **batch**: up to 500 at a time as plain text, csv or json
 - **check**: paste an address to see which coins it matches and whether the checksum adds up

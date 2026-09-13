@@ -16,10 +16,10 @@
 
   var wanted = new URLSearchParams(location.search).get("coin") || TG.store.get("tg-coin", "random");
   coinSelect.value = TG.findCoin(wanted) ? wanted : "random";
-  viewSelect.value = TG.views[TG.store.get("tg-view")] ? TG.store.get("tg-view") : "normal";
+  viewSelect.value = TG.viewNames.indexOf(TG.store.get("tg-view")) >= 0 ? TG.store.get("tg-view") : "normal";
 
   function showAddress() {
-    $("address").textContent = TG.views[viewSelect.value](current.address);
+    TG.renderView($("address"), viewSelect.value, current.address);
   }
 
   function generate() {
@@ -51,6 +51,11 @@
     $("luck").textContent = TG.luck(address) + "/100";
     $("fortune").textContent = TG.fortune();
     $("common").textContent = TG.mostCommon(address);
+    $("zodiac").textContent = TG.zodiac(address);
+    $("tomoko-approval").textContent = TG.tomokoApproval(address);
+    $("versus").textContent = TG.digitsVsLetters(address);
+    $("digit-sum").textContent = TG.digitSum(address);
+    $("palindrome").textContent = TG.palindrome(address);
     $("brute").textContent = TG.bruteForce(coin.bits);
     $("price").textContent = TG.fakePrice();
     $("count").textContent = TG.bump();
@@ -158,6 +163,18 @@
   setInterval(function () {
     $("hodl").textContent = TG.duration(Date.now() - startedAt);
   }, 1000);
+
+  function realWorld() {
+    TG.gasPrice().then(function (text) { $("gas").textContent = text; }, function () {
+      $("gas").textContent = "couldn't reach fueleconomy.gov right now";
+    });
+    TG.ibmPrice().then(function (text) { $("ibm").textContent = text; }, function () {
+      $("ibm").textContent = "couldn't reach alpha vantage right now (the free demo has a daily limit)";
+    });
+  }
+
+  realWorld();
+  setInterval(realWorld, 10 * 60 * 1000);
 
   generate();
 })(window.TG);
