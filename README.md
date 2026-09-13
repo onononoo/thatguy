@@ -1,3 +1,7 @@
+# prolly my brokest project ever. i fuck with tomoko. 
+
+
+
 # thatguy
 
 a real crypto address from a real stranger, every time you refresh.
